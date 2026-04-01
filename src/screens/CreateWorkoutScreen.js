@@ -39,7 +39,7 @@ export default function CreateWorkoutScreen({ navigation }) {
   const [dateBlocked, setDateBlocked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [exercises, setExercises] = useState([newExercise()]);
-  const { addXp, incrementStreak } = useUserStore();
+  const { addXp } = useUserStore();
 
   // Reseta o formulário e reverifica o bloqueio de data toda vez que a aba recebe foco
   useFocusEffect(
@@ -139,7 +139,6 @@ export default function CreateWorkoutScreen({ navigation }) {
     if (saved) {
       if (isCompleted) {
         addXp(XP_PER_WORKOUT);
-        incrementStreak();
       }
       navigation.navigate('Histórico');
     } else {

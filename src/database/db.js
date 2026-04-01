@@ -133,6 +133,35 @@ export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
   return result ? result.count : 0;
 };
 
+export const getStreak = () => {
+  if (!db) return 0;
+  const rows = db.getAllSync(
+    "SELECT DISTINCT date FROM workouts WHERE status = 'completed' ORDER BY date DESC"
+  );
+  if (rows.length === 0) return 0;
+
+  const toYMD = (d) => d.toISOString().split('T')[0];
+  const today = toYMD(new Date());
+  const yesterday = toYMD(new Date(Date.now() - 86400000));
+
+  // Sequência só é válida se o treino mais recente foi hoje ou ontem
+  if (rows[0].date !== today && rows[0].date !== yesterday) return 0;
+
+  let streak = 0;
+  let expected = rows[0].date;
+  for (const row of rows) {
+    if (row.date === expected) {
+      streak++;
+      const d = new Date(expected + 'T12:00:00Z');
+      d.setUTCDate(d.getUTCDate() - 1);
+      expected = toYMD(d);
+    } else {
+      break;
+    }
+  }
+  return streak;
+};
+
 export const getAllExerciseProgress = () => {
   if (!db) return [];
 

@@ -130,3 +130,4 @@ src/
 | v1.5   | Cards expansíveis com nome e data dos treinos comparados |
 | v1.6   | Agrupamento por ID do treino para detectar variação no mesmo dia |
 | v1.7   | Reset do formulário e revalidação de data ao retornar para a aba |
+| v1.8   | Streak calculado dinamicamente a partir das datas reais do banco (dias consecutivos) |

@@ -4,17 +4,19 @@ import { useFocusEffect } from '@react-navigation/native';
 import useUserStore from '../store/useUserStore';
 import ProgressBar from '../components/ProgressBar';
 import StatCard from '../components/StatCard';
-import { getAllExerciseProgress, getWorkoutsCountBetweenDates } from '../database/db';
+import { getAllExerciseProgress, getWorkoutsCountBetweenDates, getStreak } from '../database/db';
 
 export default function HomeScreen() {
-  const { level, xp, streak, weeklyGoal } = useUserStore();
+  const { level, xp, weeklyGoal } = useUserStore();
   const [progressList, setProgressList] = useState([]);
   const [weeklyCount, setWeeklyCount] = useState(0);
+  const [dbStreak, setDbStreak] = useState(0);
   const [expandedCard, setExpandedCard] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
       setProgressList(getAllExerciseProgress());
+      setDbStreak(getStreak());
 
       const now = new Date();
       const dayOfWeek = now.getDay();
@@ -47,7 +49,7 @@ export default function HomeScreen() {
 
       {/* Streak e Meta */}
       <View style={styles.cards}>
-        <StatCard title="Sequência" value={`${streak} dias`} icon="🔥" color="#FF6B00" />
+        <StatCard title="Sequência" value={`${dbStreak} dias`} icon="🔥" color="#FF6B00" />
         <StatCard title="Meta semanal" value={`${weeklyCount}/${weeklyGoal}`} icon="🎯" color="#00BFFF" />
       </View>
 

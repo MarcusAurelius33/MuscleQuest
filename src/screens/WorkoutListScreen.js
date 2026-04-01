@@ -15,7 +15,7 @@ const XP_PER_WORKOUT = 20;
 
 export default function WorkoutListScreen() {
   const [workouts, setWorkouts] = useState([]);
-  const { addXp, incrementStreak, removeXp, decrementStreak } = useUserStore();
+  const { addXp, removeXp } = useUserStore();
 
   useFocusEffect(
     useCallback(() => {
@@ -30,7 +30,7 @@ export default function WorkoutListScreen() {
     Alert.alert(
       'Excluir treino',
       wasCompleted
-        ? `Excluir "${workout.name}"? Você perderá ${xpEarned} XP e 1 dia de sequência.`
+        ? `Excluir "${workout.name}"? Você perderá ${xpEarned} XP.`
         : `Excluir "${workout.name}"? O dia ficará livre para outro treino.`,
       [
         { text: 'Cancelar', style: 'cancel' },
@@ -42,7 +42,6 @@ export default function WorkoutListScreen() {
             if (ok) {
               if (wasCompleted) {
                 removeXp(xpEarned);
-                decrementStreak();
               }
               setWorkouts(getAllWorkoutsWithDetails());
             } else {
@@ -65,7 +64,6 @@ export default function WorkoutListScreen() {
           onPress: () => {
             markWorkoutCompleted(workout.id, XP_PER_WORKOUT);
             addXp(XP_PER_WORKOUT);
-            incrementStreak();
             setWorkouts(getAllWorkoutsWithDetails());
           },
         },
