@@ -70,8 +70,8 @@ export default function HomeScreen() {
 
       {/* Variação de carga */}
       {progressData && (
-        <View style={[styles.progressCard, { borderLeftColor: progressData.improved ? '#00FF66' : '#FF6B00' }]}>
-          <Text style={[styles.progressTitle, { color: progressData.improved ? '#00FF66' : '#FF6B00' }]}>
+        <View style={[styles.progressCard, { borderLeftColor: progressData.improved ? '#00FF66' : '#FF4444' }]}>
+          <Text style={[styles.progressTitle, { color: progressData.improved ? '#00FF66' : '#FF4444' }]}>
             {progressData.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
           </Text>
           <Text style={styles.progressExercise}>{progressData.exerciseName}</Text>
