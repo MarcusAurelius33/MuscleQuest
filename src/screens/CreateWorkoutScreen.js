@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { insertWorkoutFull, getWorkoutCountForDate } from '../database/db';
 import useUserStore from '../store/useUserStore';
@@ -39,6 +40,19 @@ export default function CreateWorkoutScreen({ navigation }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [exercises, setExercises] = useState([newExercise()]);
   const { addXp, incrementStreak } = useUserStore();
+
+  // Reseta o formulário e reverifica o bloqueio de data toda vez que a aba recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      const today = new Date();
+      setWorkoutName('');
+      setDate(today);
+      setShowDatePicker(false);
+      setIsCompleted(false);
+      setExercises([newExercise()]);
+      setDateBlocked(getWorkoutCountForDate(toStorageDate(today)) > 0);
+    }, [])
+  );
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
