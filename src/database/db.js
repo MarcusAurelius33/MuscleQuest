@@ -98,6 +98,15 @@ export const markWorkoutCompleted = (id, xp) => {
   stm.finalizeSync();
 };
 
+export const getWorkoutCountForDate = (date) => {
+  if (!db) return 0;
+  const result = db.getFirstSync(
+    'SELECT COUNT(*) as count FROM workouts WHERE date = ?',
+    [date]
+  );
+  return result ? result.count : 0;
+};
+
 export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
   if (!db) return 0;
   const result = db.getFirstSync(

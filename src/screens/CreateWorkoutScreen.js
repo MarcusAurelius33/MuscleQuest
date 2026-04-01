@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { insertWorkoutFull } from '../database/db';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { insertWorkoutFull, getWorkoutCountForDate } from '../database/db';
 import useUserStore from '../store/useUserStore';
 
 const XP_PER_WORKOUT = 20;
@@ -22,12 +23,34 @@ function newExercise() {
   return { name: '', muscle_group: MUSCLE_GROUPS[0], sets: [{ reps: '', weight: '' }] };
 }
 
+function toStorageDate(date) {
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+function toDisplayDate(date) {
+  return date.toLocaleDateString('pt-BR'); // DD/MM/YYYY
+}
+
 export default function CreateWorkoutScreen({ navigation }) {
   const [workoutName, setWorkoutName] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateBlocked, setDateBlocked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [exercises, setExercises] = useState([newExercise()]);
   const { addXp, incrementStreak } = useUserStore();
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (event.type === 'dismissed' || !selectedDate) return;
+
+    setDate(selectedDate);
+
+    // Verifica se já existe treino nessa data
+    const storageDate = toStorageDate(selectedDate);
+    const count = getWorkoutCountForDate(storageDate);
+    setDateBlocked(count > 0);
+  };
 
   const updateExercise = (exIndex, field, value) => {
     setExercises((prev) => {
@@ -83,13 +106,17 @@ export default function CreateWorkoutScreen({ navigation }) {
         return;
       }
     }
+    if (dateBlocked) {
+      Alert.alert('Dia ocupado', 'Já existe um treino registrado nessa data. Escolha outro dia.');
+      return;
+    }
 
     const status = isCompleted ? 'completed' : 'planned';
     const xpEarned = isCompleted ? XP_PER_WORKOUT : 0;
 
     const saved = insertWorkoutFull({
       name: workoutName.trim(),
-      date,
+      date: toStorageDate(date),
       status,
       xpEarned,
       exercises,
@@ -117,14 +144,35 @@ export default function CreateWorkoutScreen({ navigation }) {
         onChangeText={setWorkoutName}
       />
 
+      {/* Seletor de data — abre o calendário nativo do Android */}
       <Text style={styles.sectionTitle}>Data</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="AAAA-MM-DD"
-        placeholderTextColor="#555"
-        value={date}
-        onChangeText={setDate}
-      />
+      <TouchableOpacity
+        style={[styles.dateButton, dateBlocked && styles.dateButtonBlocked]}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.dateButtonIcon}>📅</Text>
+        <Text style={[styles.dateButtonText, dateBlocked && styles.dateButtonTextBlocked]}>
+          {toDisplayDate(date)}
+        </Text>
+        {dateBlocked && (
+          <Text style={styles.dateBlockedBadge}>Dia ocupado</Text>
+        )}
+      </TouchableOpacity>
+
+      {dateBlocked && (
+        <Text style={styles.dateBlockedHint}>
+          Já há um treino registrado nessa data. Escolha outro dia para continuar.
+        </Text>
+      )}
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="calendar"
+          onChange={handleDateChange}
+        />
+      )}
 
       <View style={styles.toggleRow}>
         <TouchableOpacity
@@ -216,7 +264,11 @@ export default function CreateWorkoutScreen({ navigation }) {
         <Text style={styles.addExerciseText}>+ Adicionar exercício</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+      <TouchableOpacity
+        style={[styles.saveButton, dateBlocked && styles.saveButtonDisabled]}
+        onPress={handleSave}
+        disabled={dateBlocked}
+      >
         <Text style={styles.saveButtonText}>
           {isCompleted ? 'Salvar treino (+20 XP)' : 'Salvar planejamento'}
         </Text>
@@ -246,6 +298,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
+  },
+  dateButton: {
+    backgroundColor: '#2A2A2A',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  dateButtonBlocked: {
+    borderWidth: 1,
+    borderColor: '#FF4444',
+    backgroundColor: '#FF444415',
+  },
+  dateButtonIcon: {
+    fontSize: 18,
+  },
+  dateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    flex: 1,
+  },
+  dateButtonTextBlocked: {
+    color: '#FF6666',
+  },
+  dateBlockedBadge: {
+    backgroundColor: '#FF444430',
+    color: '#FF6666',
+    fontSize: 11,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  dateBlockedHint: {
+    color: '#FF6666',
+    fontSize: 12,
+    marginTop: -6,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -369,6 +459,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#333333',
   },
   saveButtonText: {
     color: '#1A1A1A',
