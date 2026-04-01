@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import useUserStore from '../store/useUserStore';
 import ProgressBar from '../components/ProgressBar';
@@ -10,6 +10,7 @@ export default function HomeScreen() {
   const { level, xp, streak, weeklyGoal } = useUserStore();
   const [progressList, setProgressList] = useState([]);
   const [weeklyCount, setWeeklyCount] = useState(0);
+  const [expandedCard, setExpandedCard] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,20 +61,47 @@ export default function HomeScreen() {
       {progressList.length > 0 && (
         <View style={styles.progressSection}>
           <Text style={styles.progressSectionTitle}>Variação de carga</Text>
-          {progressList.map((item) => (
-            <View
-              key={item.exerciseName}
-              style={[styles.progressCard, { borderLeftColor: item.improved ? '#00FF66' : '#FF4444' }]}
-            >
-              <Text style={[styles.progressTitle, { color: item.improved ? '#00FF66' : '#FF4444' }]}>
-                {item.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
-              </Text>
-              <Text style={styles.progressExercise}>{item.exerciseName}</Text>
-              <Text style={styles.progressValues}>
-                Anterior: {item.previousWeight} kg {'→'} Recente: {item.recentWeight} kg
-              </Text>
-            </View>
-          ))}
+          {progressList.map((item) => {
+            const isExpanded = expandedCard === item.exerciseName;
+            const accentColor = item.improved ? '#00FF66' : '#FF4444';
+            return (
+              <TouchableOpacity
+                key={item.exerciseName}
+                activeOpacity={0.8}
+                onPress={() => setExpandedCard(isExpanded ? null : item.exerciseName)}
+                style={[styles.progressCard, { borderLeftColor: accentColor }]}
+              >
+                <View style={styles.progressHeader}>
+                  <Text style={[styles.progressTitle, { color: accentColor }]}>
+                    {item.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
+                  </Text>
+                  <Text style={[styles.progressChevron, { color: accentColor }]}>
+                    {isExpanded ? '▲' : '▼'}
+                  </Text>
+                </View>
+                <Text style={styles.progressExercise}>{item.exerciseName}</Text>
+                <Text style={styles.progressValues}>
+                  Anterior: {item.previousWeight} kg {'→'} Recente: {item.recentWeight} kg
+                </Text>
+
+                {isExpanded && (
+                  <View style={styles.progressDetail}>
+                    <View style={styles.progressDetailRow}>
+                      <Text style={styles.progressDetailLabel}>Treino anterior</Text>
+                      <Text style={styles.progressDetailWorkout}>{item.previousWorkoutName}</Text>
+                      <Text style={styles.progressDetailDate}>{item.previousDate}</Text>
+                    </View>
+                    <View style={[styles.progressDetailDivider, { backgroundColor: accentColor + '40' }]} />
+                    <View style={styles.progressDetailRow}>
+                      <Text style={styles.progressDetailLabel}>Treino recente</Text>
+                      <Text style={styles.progressDetailWorkout}>{item.recentWorkoutName}</Text>
+                      <Text style={styles.progressDetailDate}>{item.recentDate}</Text>
+                    </View>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       )}
     </ScrollView>
@@ -132,10 +160,18 @@ const styles = StyleSheet.create({
     padding: 16,
     borderLeftWidth: 4,
   },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   progressTitle: {
     fontWeight: 'bold',
     fontSize: 13,
-    marginBottom: 4,
+  },
+  progressChevron: {
+    fontSize: 11,
   },
   progressExercise: {
     color: '#FFFFFF',
@@ -146,5 +182,30 @@ const styles = StyleSheet.create({
     color: '#AAAAAA',
     fontSize: 14,
     marginTop: 2,
+  },
+  progressDetail: {
+    marginTop: 12,
+    gap: 8,
+  },
+  progressDetailRow: {
+    gap: 2,
+  },
+  progressDetailLabel: {
+    color: '#666666',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  progressDetailWorkout: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  progressDetailDate: {
+    color: '#888888',
+    fontSize: 12,
+  },
+  progressDetailDivider: {
+    height: 1,
   },
 });

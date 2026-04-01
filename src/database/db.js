@@ -139,7 +139,7 @@ export const getAllExerciseProgress = () => {
   // Agrupa por exercício + ID do treino (não por data) para tratar cada treino
   // como sessão independente, mesmo que dois treinos caiam no mesmo dia
   const history = db.getAllSync(`
-    SELECT e.name, w.id as workout_id, w.date, MAX(s.weight) as max_weight
+    SELECT e.name, w.id as workout_id, w.name as workout_name, w.date, MAX(s.weight) as max_weight
     FROM sets s
     JOIN exercises e ON s.exercise_id = e.id
     JOIN workouts w ON e.workout_id = w.id
@@ -159,14 +159,17 @@ export const getAllExerciseProgress = () => {
     if (records.length < 2) continue;
 
     const recentWeight = records[0].max_weight;
-    const previousWeight = records[1].max_weight; // sessão imediatamente anterior
+    const previousWeight = records[1].max_weight;
 
     if (recentWeight !== previousWeight) {
       results.push({
         exerciseName,
-        previousWeight,
         recentWeight,
-        date: records[0].date,
+        recentDate: records[0].date,
+        recentWorkoutName: records[0].workout_name,
+        previousWeight,
+        previousDate: records[1].date,
+        previousWorkoutName: records[1].workout_name,
         improved: recentWeight > previousWeight,
       });
     }
