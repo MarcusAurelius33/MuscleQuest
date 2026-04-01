@@ -15,9 +15,10 @@ App mobile de registro, armazenamento e planejamento de treinos gamificado.
 - Nível e barra de XP do usuário
 - Contador de sequência (streak) de dias com treino
 - Meta semanal de treinos com barra de progresso
-- Detecção de variação de carga nos exercícios:
-  - **Verde** — evolução: carga recente superou o máximo histórico
-  - **Vermelho** — queda: carga recente abaixo do máximo histórico
+- Seção "Variação de Carga" com um card por exercício que teve mudança entre as duas sessões mais recentes:
+  - **Verde** — evolução: carga recente maior que a sessão anterior
+  - **Vermelho** — queda: carga recente menor que a sessão anterior
+  - Toque no card expande e exibe nome e data do treino de cada sessão comparada
 
 ### Tela Histórico
 - Lista de todos os treinos registrados (mais recentes primeiro)
@@ -28,6 +29,7 @@ App mobile de registro, armazenamento e planejamento de treinos gamificado.
 ### Tela Registrar
 - Seletor de data nativo (calendário Android)
 - Limite de 1 treino por dia — o formulário bloqueia datas já ocupadas
+- Ao retornar para a aba o formulário é resetado e a data é revalidada automaticamente
 - Formulário com múltiplos exercícios, seleção de grupo muscular por chips horizontais
 - Adição dinâmica de séries com repetições e carga
 - Modo **Planejar** (salva como planejado) ou **Registrar concluído** (+20 XP imediato)
@@ -38,7 +40,7 @@ App mobile de registro, armazenamento e planejamento de treinos gamificado.
 - **Níveis**: cada nível requer `nível × 100` XP (nível 1 = 100 XP, nível 2 = 200 XP...)
   - Ao subir de nível o XP excedente é carregado; ao descer de nível o XP é recalculado
 - **Streak**: incrementa a cada treino concluído; decrementa ao excluir um treino concluído
-- **Evolução/Queda**: compara a carga máxima da sessão mais recente contra o maior valor histórico de todas as sessões anteriores do mesmo exercício
+- **Variação de carga**: compara a carga máxima da sessão mais recente com a sessão imediatamente anterior do mesmo exercício, agrupando por ID de treino (detecta variação mesmo entre treinos no mesmo dia)
 
 ## Banco de dados
 
@@ -55,7 +57,7 @@ npm install
 npx expo start
 ```
 
-Com o emulador Android aberto no Android Studio, pressione `a` no terminal do Expo.
+Com o celular na mesma rede WiFi do computador, o app abre automaticamente pelo Expo Go.
 
 ## Estrutura do projeto
 
@@ -69,7 +71,7 @@ src/
 ├── navigation/
 │   └── AppNavigator.js     ← Bottom Tab Navigator (Início / Histórico / Registrar)
 ├── screens/
-│   ├── HomeScreen.js           ← dashboard gamificado
+│   ├── HomeScreen.js           ← dashboard gamificado com cards expansíveis
 │   ├── WorkoutListScreen.js    ← histórico com conclusão e exclusão
 │   └── CreateWorkoutScreen.js  ← formulário com calendário e validação de dia
 └── store/
@@ -82,5 +84,9 @@ src/
 |--------|-----------|
 | Setup  | Arquitetura limpa, navegação, banco SQLite, telas base e gamificação |
 | v1.1   | Calendário nativo para data e limite de 1 treino por dia |
-| v1.2   | Comparação de carga com máximo histórico (evolução e queda de desempenho) |
+| v1.2   | Comparação de carga entre sessões consecutivas (evolução e queda) |
 | v1.3   | Exclusão de treino com reversão de XP, streak e liberação do dia |
+| v1.4   | Cards de variação para todos os exercícios na tela inicial |
+| v1.5   | Cards expansíveis com nome e data dos treinos comparados |
+| v1.6   | Agrupamento por ID do treino para detectar variação no mesmo dia |
+| v1.7   | Reset do formulário e revalidação de data ao retornar para a aba |
