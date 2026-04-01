@@ -131,3 +131,4 @@ src/
 | v1.6   | Agrupamento por ID do treino para detectar variação no mesmo dia |
 | v1.7   | Reset do formulário e revalidação de data ao retornar para a aba |
 | v1.8   | Streak calculado dinamicamente a partir das datas reais do banco (dias consecutivos) |
+| v1.9   | Validação de data nos modos Planejar/Concluído: passado força conclusão, futuro força planejamento |

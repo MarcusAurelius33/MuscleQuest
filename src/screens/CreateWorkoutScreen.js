@@ -32,6 +32,15 @@ function toDisplayDate(date) {
   return date.toLocaleDateString('pt-BR'); // DD/MM/YYYY
 }
 
+// 'past' | 'today' | 'future'
+function getDateCategory(date) {
+  const today = toStorageDate(new Date());
+  const d = toStorageDate(date);
+  if (d < today) return 'past';
+  if (d > today) return 'future';
+  return 'today';
+}
+
 export default function CreateWorkoutScreen({ navigation }) {
   const [workoutName, setWorkoutName] = useState('');
   const [date, setDate] = useState(new Date());
@@ -60,10 +69,14 @@ export default function CreateWorkoutScreen({ navigation }) {
 
     setDate(selectedDate);
 
-    // Verifica se já existe treino nessa data
     const storageDate = toStorageDate(selectedDate);
     const count = getWorkoutCountForDate(storageDate);
     setDateBlocked(count > 0);
+
+    // Força o modo correto conforme a data escolhida
+    const category = getDateCategory(selectedDate);
+    if (category === 'past') setIsCompleted(true);
+    if (category === 'future') setIsCompleted(false);
   };
 
   const updateExercise = (exIndex, field, value) => {
@@ -187,24 +200,41 @@ export default function CreateWorkoutScreen({ navigation }) {
         />
       )}
 
-      <View style={styles.toggleRow}>
-        <TouchableOpacity
-          style={[styles.toggleButton, !isCompleted && styles.toggleActive]}
-          onPress={() => setIsCompleted(false)}
-        >
-          <Text style={[styles.toggleText, !isCompleted && styles.toggleTextActive]}>
-            Planejar
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, isCompleted && styles.toggleActiveGreen]}
-          onPress={() => setIsCompleted(true)}
-        >
-          <Text style={[styles.toggleText, isCompleted && styles.toggleTextActive]}>
-            Registrar concluído
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {(() => {
+        const category = getDateCategory(date);
+        const canPlan = category !== 'past';
+        const canComplete = category !== 'future';
+        return (
+          <View style={styles.toggleRow}>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                !isCompleted && styles.toggleActive,
+                !canPlan && styles.toggleDisabled,
+              ]}
+              onPress={() => canPlan && setIsCompleted(false)}
+              disabled={!canPlan}
+            >
+              <Text style={[styles.toggleText, !isCompleted && styles.toggleTextActive, !canPlan && styles.toggleTextDisabled]}>
+                Planejar
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                isCompleted && styles.toggleActiveGreen,
+                !canComplete && styles.toggleDisabled,
+              ]}
+              onPress={() => canComplete && setIsCompleted(true)}
+              disabled={!canComplete}
+            >
+              <Text style={[styles.toggleText, isCompleted && styles.toggleTextActive, !canComplete && styles.toggleTextDisabled]}>
+                Registrar concluído
+              </Text>
+            </TouchableOpacity>
+          </View>
+        );
+      })()}
 
       {exercises.map((ex, exIndex) => (
         <View key={exIndex} style={styles.exerciseCard}>
@@ -371,12 +401,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#00FF66',
   },
+  toggleDisabled: {
+    opacity: 0.35,
+  },
   toggleText: {
     color: '#888888',
     fontWeight: '600',
   },
   toggleTextActive: {
     color: '#FFFFFF',
+  },
+  toggleTextDisabled: {
+    color: '#555555',
   },
   exerciseCard: {
     backgroundColor: '#222222',

@@ -116,7 +116,7 @@ export default function WorkoutListScreen() {
           ))}
 
           <View style={styles.actions}>
-            {workout.status === 'planned' && (
+            {workout.status === 'planned' && workout.date <= new Date().toISOString().split('T')[0] && (
               <TouchableOpacity
                 style={styles.completeButton}
                 onPress={() => handleComplete(workout)}
