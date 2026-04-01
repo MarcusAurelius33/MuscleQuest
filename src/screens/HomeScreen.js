@@ -76,7 +76,7 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.progressExercise}>{progressData.exerciseName}</Text>
           <Text style={styles.progressValues}>
-            Máx. anterior: {progressData.previousMax} kg {'→'} Recente: {progressData.recentWeight} kg
+            Anterior: {progressData.previousWeight} kg {'→'} Recente: {progressData.recentWeight} kg
           </Text>
         </View>
       )}

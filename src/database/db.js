@@ -157,17 +157,15 @@ export const getTopExerciseProgress = () => {
     if (records.length < 2) continue;
 
     const recentWeight = records[0].max_weight;
+    const previousWeight = records[1].max_weight; // sessão imediatamente anterior
 
-    // Máximo histórico considerando TODAS as sessões anteriores (exceto a mais recente)
-    const previousMax = Math.max(...records.slice(1).map((r) => r.max_weight));
-
-    if (recentWeight !== previousMax) {
+    if (recentWeight !== previousWeight) {
       return {
         exerciseName,
-        previousMax,
+        previousWeight,
         recentWeight,
         date: records[0].date,
-        improved: recentWeight > previousMax,
+        improved: recentWeight > previousWeight,
       };
     }
   }
