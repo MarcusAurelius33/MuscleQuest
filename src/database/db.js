@@ -118,6 +118,8 @@ export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
 
 export const getTopExerciseProgress = () => {
   if (!db) return null;
+
+  // Para cada exercício, busca o máximo de carga por sessão (data), do mais recente ao mais antigo
   const history = db.getAllSync(`
     SELECT e.name, w.date, MAX(s.weight) as max_weight
     FROM sets s
@@ -135,12 +137,21 @@ export const getTopExerciseProgress = () => {
   }
 
   for (const [exerciseName, records] of Object.entries(map)) {
-    if (records.length >= 2) {
-      const recentWeight = records[0].max_weight;
-      const oldWeight = records[1].max_weight;
-      if (recentWeight > oldWeight) {
-        return { exerciseName, oldWeight, newWeight: recentWeight, date: records[0].date };
-      }
+    if (records.length < 2) continue;
+
+    const recentWeight = records[0].max_weight;
+
+    // Máximo histórico considerando TODAS as sessões anteriores (exceto a mais recente)
+    const previousMax = Math.max(...records.slice(1).map((r) => r.max_weight));
+
+    if (recentWeight !== previousMax) {
+      return {
+        exerciseName,
+        previousMax,
+        recentWeight,
+        date: records[0].date,
+        improved: recentWeight > previousMax,
+      };
     }
   }
   return null;

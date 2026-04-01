@@ -68,13 +68,15 @@ export default function HomeScreen() {
         <ProgressBar progress={weeklyProgress} color="#00BFFF" />
       </View>
 
-      {/* Evolução de carga */}
+      {/* Variação de carga */}
       {progressData && (
-        <View style={styles.progressCard}>
-          <Text style={styles.progressTitle}>Evolução detectada!</Text>
+        <View style={[styles.progressCard, { borderLeftColor: progressData.improved ? '#00FF66' : '#FF6B00' }]}>
+          <Text style={[styles.progressTitle, { color: progressData.improved ? '#00FF66' : '#FF6B00' }]}>
+            {progressData.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
+          </Text>
           <Text style={styles.progressExercise}>{progressData.exerciseName}</Text>
           <Text style={styles.progressValues}>
-            {progressData.oldWeight} kg → {progressData.newWeight} kg
+            Máx. anterior: {progressData.previousMax} kg {'→'} Recente: {progressData.recentWeight} kg
           </Text>
         </View>
       )}
