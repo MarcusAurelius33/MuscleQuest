@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
@@ -27,8 +26,6 @@ export default function AppNavigator() {
           tabBarStyle: {
             backgroundColor: '#1A1A1A',
             borderTopColor: '#2A2A2A',
-            height: 60,
-            paddingBottom: 8,
           },
           tabBarLabelStyle: {
             fontSize: 12,
