@@ -8,20 +8,51 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getAllWorkoutsWithDetails, markWorkoutCompleted } from '../database/db';
+import { getAllWorkoutsWithDetails, markWorkoutCompleted, deleteWorkout } from '../database/db';
 import useUserStore from '../store/useUserStore';
 
 const XP_PER_WORKOUT = 20;
 
 export default function WorkoutListScreen() {
   const [workouts, setWorkouts] = useState([]);
-  const { addXp, incrementStreak } = useUserStore();
+  const { addXp, incrementStreak, removeXp, decrementStreak } = useUserStore();
 
   useFocusEffect(
     useCallback(() => {
       setWorkouts(getAllWorkoutsWithDetails());
     }, [])
   );
+
+  const handleDelete = (workout) => {
+    const wasCompleted = workout.status === 'completed';
+    const xpEarned = workout.xpEarned || 0;
+
+    Alert.alert(
+      'Excluir treino',
+      wasCompleted
+        ? `Excluir "${workout.name}"? Você perderá ${xpEarned} XP e 1 dia de sequência.`
+        : `Excluir "${workout.name}"? O dia ficará livre para outro treino.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => {
+            const ok = deleteWorkout(workout.id);
+            if (ok) {
+              if (wasCompleted) {
+                removeXp(xpEarned);
+                decrementStreak();
+              }
+              setWorkouts(getAllWorkoutsWithDetails());
+            } else {
+              Alert.alert('Erro', 'Não foi possível excluir o treino.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleComplete = (workout) => {
     Alert.alert(
@@ -86,14 +117,22 @@ export default function WorkoutListScreen() {
             </View>
           ))}
 
-          {workout.status === 'planned' && (
+          <View style={styles.actions}>
+            {workout.status === 'planned' && (
+              <TouchableOpacity
+                style={styles.completeButton}
+                onPress={() => handleComplete(workout)}
+              >
+                <Text style={styles.completeButtonText}>Marcar como concluído</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
-              style={styles.completeButton}
-              onPress={() => handleComplete(workout)}
+              style={styles.deleteButton}
+              onPress={() => handleDelete(workout)}
             >
-              <Text style={styles.completeButtonText}>Marcar como concluído</Text>
+              <Text style={styles.deleteButtonText}>Excluir</Text>
             </TouchableOpacity>
-          )}
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -182,16 +221,31 @@ const styles = StyleSheet.create({
     color: '#999999',
     fontSize: 13,
   },
+  actions: {
+    gap: 8,
+    marginTop: 4,
+  },
   completeButton: {
     backgroundColor: '#00FF66',
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
-    marginTop: 4,
   },
   completeButtonText: {
     color: '#1A1A1A',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  deleteButton: {
+    borderWidth: 1,
+    borderColor: '#FF444460',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#FF4444',
+    fontSize: 13,
+    fontWeight: 'bold',
   },
 });

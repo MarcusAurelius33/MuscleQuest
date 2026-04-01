@@ -98,6 +98,23 @@ export const markWorkoutCompleted = (id, xp) => {
   stm.finalizeSync();
 };
 
+export const deleteWorkout = (id) => {
+  try {
+    // Busca os exercícios para poder apagar as séries manualmente
+    // (SQLite não ativa CASCADE por padrão)
+    const exercises = db.getAllSync('SELECT id FROM exercises WHERE workout_id = ?', [id]);
+    for (const ex of exercises) {
+      db.runSync('DELETE FROM sets WHERE exercise_id = ?', [ex.id]);
+    }
+    db.runSync('DELETE FROM exercises WHERE workout_id = ?', [id]);
+    db.runSync('DELETE FROM workouts WHERE id = ?', [id]);
+    return true;
+  } catch (e) {
+    console.error('Erro ao excluir treino:', e);
+    return false;
+  }
+};
+
 export const getWorkoutCountForDate = (date) => {
   if (!db) return 0;
   const result = db.getFirstSync(
