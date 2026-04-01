@@ -50,14 +50,54 @@ exercises (id, workout_id, muscle_group, name)
 sets      (id, exercise_id, set_number, reps, weight)
 ```
 
-## Como rodar
+## Como Executar (Ambiente Local)
+
+### Pré-requisitos
+
+Certifique-se de ter as seguintes ferramentas instaladas:
+
+- **[Git](https://git-scm.com/):** Para clonar o repositório.
+- **[Node.js](https://nodejs.org/)** (versão 18 ou superior): Ambiente de execução JavaScript.
+- **[Expo Go](https://expo.dev/go):** Aplicativo instalado no celular Android para rodar o app sem build nativo.
+- Celular e computador **na mesma rede WiFi** para a comunicação via Metro Bundler.
+
+---
+
+### Passo 1: Clonar o Repositório
+
+```bash
+git clone https://github.com/MarcusAurelius33/MuscleQuest.git
+cd MuscleQuest
+```
+
+### Passo 2: Instalar as Dependências
 
 ```bash
 npm install
+```
+
+Todas as dependências declaradas no `package.json` serão instaladas, incluindo Expo SDK, React Navigation, expo-sqlite e Zustand.
+
+### Passo 3: Iniciar o Servidor de Desenvolvimento
+
+```bash
 npx expo start
 ```
 
-Com o celular na mesma rede WiFi do computador, o app abre automaticamente pelo Expo Go.
+O Metro Bundler será iniciado e exibirá um QR Code no terminal.
+
+### Passo 4: Abrir no Dispositivo
+
+Com o aplicativo **Expo Go** aberto no celular:
+
+- **Android:** escaneie o QR Code exibido no terminal com a câmera do Expo Go.
+- O app será compilado e aberto automaticamente no dispositivo.
+
+> **Atenção:** o celular e o computador devem estar na mesma rede WiFi. Caso o app não carregue, verifique se o firewall do sistema não está bloqueando a porta `8081`.
+
+### Passo 5: Banco de Dados
+
+Nenhuma configuração manual é necessária. O banco SQLite (`musclequest.db`) é criado automaticamente no primeiro acesso, dentro do armazenamento local do dispositivo.
 
 ## Estrutura do projeto
 
