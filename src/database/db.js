@@ -136,15 +136,16 @@ export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
 export const getAllExerciseProgress = () => {
   if (!db) return [];
 
-  // Para cada exercício, busca o máximo de carga por sessão (data), do mais recente ao mais antigo
+  // Agrupa por exercício + ID do treino (não por data) para tratar cada treino
+  // como sessão independente, mesmo que dois treinos caiam no mesmo dia
   const history = db.getAllSync(`
-    SELECT e.name, w.date, MAX(s.weight) as max_weight
+    SELECT e.name, w.id as workout_id, w.date, MAX(s.weight) as max_weight
     FROM sets s
     JOIN exercises e ON s.exercise_id = e.id
     JOIN workouts w ON e.workout_id = w.id
     WHERE w.status = 'completed'
-    GROUP BY e.name, w.date
-    ORDER BY e.name, w.date DESC
+    GROUP BY e.name, w.id
+    ORDER BY e.name, w.date DESC, w.id DESC
   `);
 
   const map = {};
