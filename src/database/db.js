@@ -133,8 +133,8 @@ export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
   return result ? result.count : 0;
 };
 
-export const getTopExerciseProgress = () => {
-  if (!db) return null;
+export const getAllExerciseProgress = () => {
+  if (!db) return [];
 
   // Para cada exercício, busca o máximo de carga por sessão (data), do mais recente ao mais antigo
   const history = db.getAllSync(`
@@ -153,6 +153,7 @@ export const getTopExerciseProgress = () => {
     map[record.name].push(record);
   }
 
+  const results = [];
   for (const [exerciseName, records] of Object.entries(map)) {
     if (records.length < 2) continue;
 
@@ -160,14 +161,14 @@ export const getTopExerciseProgress = () => {
     const previousWeight = records[1].max_weight; // sessão imediatamente anterior
 
     if (recentWeight !== previousWeight) {
-      return {
+      results.push({
         exerciseName,
         previousWeight,
         recentWeight,
         date: records[0].date,
         improved: recentWeight > previousWeight,
-      };
+      });
     }
   }
-  return null;
+  return results;
 };

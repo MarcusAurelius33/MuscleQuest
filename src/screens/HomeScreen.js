@@ -1,20 +1,19 @@
-import React, { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import useUserStore from '../store/useUserStore';
 import ProgressBar from '../components/ProgressBar';
 import StatCard from '../components/StatCard';
-import { getTopExerciseProgress, getWorkoutsCountBetweenDates } from '../database/db';
+import { getAllExerciseProgress, getWorkoutsCountBetweenDates } from '../database/db';
 
 export default function HomeScreen() {
   const { level, xp, streak, weeklyGoal } = useUserStore();
-  const [progressData, setProgressData] = React.useState(null);
-  const [weeklyCount, setWeeklyCount] = React.useState(0);
+  const [progressList, setProgressList] = useState([]);
+  const [weeklyCount, setWeeklyCount] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
-      const progress = getTopExerciseProgress();
-      setProgressData(progress);
+      setProgressList(getAllExerciseProgress());
 
       const now = new Date();
       const dayOfWeek = now.getDay();
@@ -24,8 +23,7 @@ export default function HomeScreen() {
       sunday.setDate(monday.getDate() + 6);
 
       const fmt = (d) => d.toISOString().split('T')[0];
-      const count = getWorkoutsCountBetweenDates(fmt(monday), fmt(sunday));
-      setWeeklyCount(count);
+      setWeeklyCount(getWorkoutsCountBetweenDates(fmt(monday), fmt(sunday)));
     }, [])
   );
 
@@ -48,18 +46,8 @@ export default function HomeScreen() {
 
       {/* Streak e Meta */}
       <View style={styles.cards}>
-        <StatCard
-          title="Sequência"
-          value={`${streak} dias`}
-          icon="🔥"
-          color="#FF6B00"
-        />
-        <StatCard
-          title="Meta semanal"
-          value={`${weeklyCount}/${weeklyGoal}`}
-          icon="🎯"
-          color="#00BFFF"
-        />
+        <StatCard title="Sequência" value={`${streak} dias`} icon="🔥" color="#FF6B00" />
+        <StatCard title="Meta semanal" value={`${weeklyCount}/${weeklyGoal}`} icon="🎯" color="#00BFFF" />
       </View>
 
       {/* Progresso da meta */}
@@ -68,16 +56,24 @@ export default function HomeScreen() {
         <ProgressBar progress={weeklyProgress} color="#00BFFF" />
       </View>
 
-      {/* Variação de carga */}
-      {progressData && (
-        <View style={[styles.progressCard, { borderLeftColor: progressData.improved ? '#00FF66' : '#FF4444' }]}>
-          <Text style={[styles.progressTitle, { color: progressData.improved ? '#00FF66' : '#FF4444' }]}>
-            {progressData.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
-          </Text>
-          <Text style={styles.progressExercise}>{progressData.exerciseName}</Text>
-          <Text style={styles.progressValues}>
-            Anterior: {progressData.previousWeight} kg {'→'} Recente: {progressData.recentWeight} kg
-          </Text>
+      {/* Cards de variação por exercício */}
+      {progressList.length > 0 && (
+        <View style={styles.progressSection}>
+          <Text style={styles.progressSectionTitle}>Variação de carga</Text>
+          {progressList.map((item) => (
+            <View
+              key={item.exerciseName}
+              style={[styles.progressCard, { borderLeftColor: item.improved ? '#00FF66' : '#FF4444' }]}
+            >
+              <Text style={[styles.progressTitle, { color: item.improved ? '#00FF66' : '#FF4444' }]}>
+                {item.improved ? 'Evolução detectada!' : 'Queda de desempenho'}
+              </Text>
+              <Text style={styles.progressExercise}>{item.exerciseName}</Text>
+              <Text style={styles.progressValues}>
+                Anterior: {item.previousWeight} kg {'→'} Recente: {item.recentWeight} kg
+              </Text>
+            </View>
+          ))}
         </View>
       )}
     </ScrollView>
@@ -92,6 +88,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     gap: 20,
+    paddingBottom: 32,
   },
   title: {
     color: '#00FF66',
@@ -119,17 +116,25 @@ const styles = StyleSheet.create({
   cards: {
     gap: 12,
   },
+  progressSection: {
+    gap: 12,
+  },
+  progressSectionTitle: {
+    color: '#888888',
+    fontSize: 13,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   progressCard: {
     backgroundColor: '#222222',
     borderRadius: 10,
     padding: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#00FF66',
   },
   progressTitle: {
-    color: '#00FF66',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 4,
   },
   progressExercise: {
