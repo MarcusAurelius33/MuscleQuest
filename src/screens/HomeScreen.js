@@ -134,10 +134,15 @@ export default function HomeScreen() {
       </View>
 
       {/* Treinos da semana */}
-      {weeklyWorkouts.length > 0 && (
-        <View style={styles.weekSection}>
-          <Text style={styles.weekTitle}>Treinos desta semana</Text>
-          {weeklyWorkouts.map((w) => {
+      <View style={styles.weekSection}>
+        <Text style={styles.weekTitle}>Treinos desta semana</Text>
+        {weeklyWorkouts.length === 0 ? (
+          <View style={styles.weekEmpty}>
+            <Text style={styles.weekEmptyText}>Nenhum treino esta semana.</Text>
+            <Text style={styles.weekEmptyHint}>Acesse a aba Registrar para planejar sua semana.</Text>
+          </View>
+        ) : (
+          weeklyWorkouts.map((w) => {
             const done = w.status === 'completed';
             return (
               <View key={w.id} style={styles.weekCard}>
@@ -151,9 +156,9 @@ export default function HomeScreen() {
                 </Text>
               </View>
             );
-          })}
-        </View>
-      )}
+          })
+        )}
+      </View>
 
       {/* Desempenho (variação de carga) */}
       {progressList.length > 0 && (
@@ -343,6 +348,20 @@ const styles = StyleSheet.create({
   weekBadge: {
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  weekEmpty: {
+    backgroundColor: '#222222',
+    borderRadius: 8,
+    padding: 16,
+    gap: 4,
+  },
+  weekEmptyText: {
+    color: '#666666',
+    fontSize: 14,
+  },
+  weekEmptyHint: {
+    color: '#888888',
+    fontSize: 13,
   },
   backdrop: {
     flex: 1,
