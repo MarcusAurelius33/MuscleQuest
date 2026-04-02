@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AppAlert from '../components/AppAlert';
-import { insertTemplate } from '../database/db';
+import { insertTemplate, updateTemplate } from '../database/db';
 
 const MUSCLE_GROUPS = [
   'Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps',
@@ -18,7 +18,9 @@ const newExercise = () => ({
   sets: [{ reps: '', weight: '' }],
 });
 
-export default function CreateTemplateScreen({ navigation }) {
+export default function CreateTemplateScreen({ navigation, route }) {
+  const editing = route.params?.template ?? null;
+
   const [templateName, setTemplateName] = useState('');
   const [exercises, setExercises] = useState([newExercise()]);
   const [alert, setAlert] = useState(null);
@@ -28,9 +30,21 @@ export default function CreateTemplateScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      setTemplateName('');
-      setExercises([newExercise()]);
-    }, [])
+      navigation.setOptions({ title: editing ? 'Editar Treino Padrão' : 'Novo Treino Padrão' });
+      if (editing) {
+        setTemplateName(editing.name);
+        setExercises(
+          editing.exercises.map((ex) => ({
+            name: ex.name,
+            muscle_group: ex.muscle_group,
+            sets: ex.sets.map((s) => ({ reps: String(s.reps), weight: String(s.weight) })),
+          }))
+        );
+      } else {
+        setTemplateName('');
+        setExercises([newExercise()]);
+      }
+    }, [editing])
   );
 
   const updateSet = (exIndex, setIndex, field, value) => {
@@ -89,7 +103,9 @@ export default function CreateTemplateScreen({ navigation }) {
         }
       }
     }
-    const ok = insertTemplate({ name: templateName.trim(), exercises });
+    const ok = editing
+      ? updateTemplate(editing.id, { name: templateName.trim(), exercises })
+      : insertTemplate({ name: templateName.trim(), exercises });
     if (ok) {
       navigation.goBack();
     } else {

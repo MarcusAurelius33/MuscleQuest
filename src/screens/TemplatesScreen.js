@@ -94,12 +94,20 @@ export default function TemplatesScreen({ navigation }) {
                       ))}
                     </View>
                   ))}
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDelete(t)}
-                  >
-                    <Text style={styles.deleteButtonText}>Excluir treino padrão</Text>
-                  </TouchableOpacity>
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => navigation.navigate('CriarTemplate', { template: t })}
+                    >
+                      <Text style={styles.editButtonText}>Editar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDelete(t)}
+                    >
+                      <Text style={styles.deleteButtonText}>Excluir</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </View>
@@ -155,13 +163,28 @@ const styles = StyleSheet.create({
   exerciseName: { color: '#EEEEEE', fontSize: 14, fontWeight: '600' },
   muscleGroup: { color: '#00FF66', fontWeight: 'normal', fontSize: 13 },
   setRow: { color: '#999999', fontSize: 13 },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: '#00FF6620',
+    borderWidth: 1,
+    borderColor: '#00FF6660',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  editButtonText: { color: '#00FF66', fontSize: 13, fontWeight: 'bold' },
   deleteButton: {
+    flex: 1,
     borderWidth: 1,
     borderColor: '#FF444460',
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
-    marginTop: 4,
   },
   deleteButtonText: { color: '#FF4444', fontSize: 13, fontWeight: 'bold' },
 });

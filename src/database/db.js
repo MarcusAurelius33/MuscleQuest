@@ -285,6 +285,36 @@ export const getAllTemplates = () => {
   return templates;
 };
 
+export const updateTemplate = (id, { name, exercises }) => {
+  try {
+    db.runSync('UPDATE workout_templates SET name = ? WHERE id = ?', [name.trim(), id]);
+    const oldExs = db.getAllSync('SELECT id FROM template_exercises WHERE template_id = ?', [id]);
+    for (const ex of oldExs) {
+      db.runSync('DELETE FROM template_sets WHERE exercise_id = ?', [ex.id]);
+    }
+    db.runSync('DELETE FROM template_exercises WHERE template_id = ?', [id]);
+    for (const ex of exercises) {
+      const exStm = db.prepareSync(
+        'INSERT INTO template_exercises (template_id, name, muscle_group) VALUES (?, ?, ?)'
+      );
+      exStm.executeSync([id, ex.name.trim(), ex.muscle_group]);
+      exStm.finalizeSync();
+      const { id: exId } = db.getFirstSync('SELECT last_insert_rowid() as id');
+      ex.sets.forEach((s, i) => {
+        const setStm = db.prepareSync(
+          'INSERT INTO template_sets (exercise_id, set_number, reps, weight) VALUES (?, ?, ?, ?)'
+        );
+        setStm.executeSync([exId, i + 1, Number(s.reps), Number(s.weight)]);
+        setStm.finalizeSync();
+      });
+    }
+    return true;
+  } catch (e) {
+    console.error('Erro ao atualizar template:', e);
+    return false;
+  }
+};
+
 export const deleteTemplate = (id) => {
   try {
     const exercises = db.getAllSync(
