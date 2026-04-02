@@ -55,6 +55,7 @@ export default function CreateWorkoutScreen({ navigation }) {
   const [alert, setAlert] = useState(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [templates, setTemplates] = useState([]);
+  const [showModeInfo, setShowModeInfo] = useState(false);
 
   const showAlert = (title, message) =>
     setAlert({ title, message, buttons: [{ text: 'OK', onPress: () => setAlert(null) }] });
@@ -202,6 +203,35 @@ export default function CreateWorkoutScreen({ navigation }) {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
+    {/* Modal de explicação dos modos */}
+    <Modal transparent animationType="fade" visible={showModeInfo} statusBarTranslucent>
+      <View style={styles.templateBackdrop}>
+        <View style={styles.infoModal}>
+          <Text style={styles.infoModalTitle}>Modos de registro</Text>
+
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoBlockLabel}>Planejar</Text>
+            <Text style={styles.infoBlockText}>
+              Salva o treino como planejado para hoje ou para uma data futura. Ele aparece no Histórico com o badge "Planejado" e não concede XP imediatamente.{'\n\n'}
+              Quando chegar o dia, abra o Histórico, expanda o treino e toque em "Marcar como concluído" para ganhar os 20 XP.
+            </Text>
+          </View>
+
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoBlockLabel}>Registrar concluído</Text>
+            <Text style={styles.infoBlockText}>
+              Salva o treino já como concluído e concede 20 XP imediatamente. Use quando o treino já foi realizado — hoje ou em dias anteriores.{'\n\n'}
+              Treinos concluídos contam para a sequência de dias e para a meta semanal exibidas na aba Início.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.templateCancelBtn} onPress={() => setShowModeInfo(false)}>
+            <Text style={styles.templateCancelText}>Entendi</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
     {/* Modal de seleção de treino padrão */}
     <Modal transparent animationType="slide" visible={showTemplates} statusBarTranslucent>
       <View style={styles.templateBackdrop}>
@@ -293,6 +323,9 @@ export default function CreateWorkoutScreen({ navigation }) {
         const canComplete = category !== 'future';
         return (
           <View style={styles.toggleRow}>
+            <TouchableOpacity style={styles.infoButton} onPress={() => setShowModeInfo(true)}>
+              <Text style={styles.infoButtonText}>?</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -677,6 +710,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
+  },
+  infoButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#2A2A2A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  infoButtonText: {
+    color: '#888888',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  infoModal: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 16,
+    padding: 20,
+    margin: 24,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+    gap: 16,
+  },
+  infoModalTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  infoBlock: {
+    gap: 6,
+  },
+  infoBlockLabel: {
+    color: '#00BFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  infoBlockText: {
+    color: '#AAAAAA',
+    fontSize: 13,
+    lineHeight: 20,
   },
   saveButtonDisabled: {
     backgroundColor: '#333333',
