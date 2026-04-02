@@ -238,10 +238,14 @@ export default function CreateWorkoutScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      {templates.length > 0 && (
+      {templates.length > 0 ? (
         <TouchableOpacity style={styles.useTemplateBtn} onPress={() => setShowTemplates(true)}>
           <Text style={styles.useTemplateBtnText}>Usar treino padrão</Text>
         </TouchableOpacity>
+      ) : (
+        <View style={styles.noTemplateHint}>
+          <Text style={styles.noTemplateHintText}>Crie treinos padrão na aba Criar e registre seus treinos com mais agilidade.</Text>
+        </View>
       )}
       <Text style={styles.sectionTitle}>Nome do treino</Text>
       <TextInput
@@ -405,6 +409,18 @@ export default function CreateWorkoutScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  noTemplateHint: {
+    backgroundColor: '#222222',
+    borderRadius: 10,
+    padding: 14,
+    borderLeftWidth: 3,
+    borderLeftColor: '#00FF6640',
+  },
+  noTemplateHintText: {
+    color: '#666666',
+    fontSize: 13,
+    lineHeight: 20,
+  },
   useTemplateBtn: {
     borderWidth: 1,
     borderColor: '#00FF6660',
