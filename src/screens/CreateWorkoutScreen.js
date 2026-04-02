@@ -424,13 +424,13 @@ const styles = StyleSheet.create({
   },
   useTemplateBtn: {
     borderWidth: 1,
-    borderColor: '#00FF6660',
+    borderColor: '#00BFFF60',
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
   },
   useTemplateBtnText: {
-    color: '#00FF66',
+    color: '#00BFFF',
     fontWeight: 'bold',
     fontSize: 14,
   },
