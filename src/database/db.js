@@ -54,9 +54,105 @@ export const initDb = () => {
         FOREIGN KEY (exercise_id) REFERENCES template_exercises(id)
       );
     `);
+    seedDefaultTemplates();
     console.log('Banco de dados inicializado com sucesso.');
   } catch (error) {
     console.error('Erro ao inicializar o banco de dados:', error);
+  }
+};
+
+// ── Seed de treinos padrão ─────────────────────────────────────────────────
+
+const s = (reps, weight) => ({ reps, weight });
+const sets = (n, reps, weight) => Array.from({ length: n }, () => s(reps, weight));
+
+const DEFAULT_TEMPLATES = [
+  // ── ABC — Iniciante ──────────────────────────────────────────────────────
+  {
+    name: 'ABC — A: Peito, Ombros e Tríceps',
+    exercises: [
+      { name: 'Supino Reto com Halteres',       muscle_group: 'Peito',    sets: sets(3, 12, 10) },
+      { name: 'Supino Inclinado com Halteres',   muscle_group: 'Peito',    sets: sets(3, 12, 10) },
+      { name: 'Voador na Máquina (Peck Deck)',   muscle_group: 'Peito',    sets: sets(3, 12, 15) },
+      { name: 'Desenvolvimento com Halteres',    muscle_group: 'Ombros',   sets: sets(3, 12, 8)  },
+      { name: 'Elevação Lateral',                muscle_group: 'Ombros',   sets: sets(3, 15, 5)  },
+      { name: 'Tríceps Corda na Polia',          muscle_group: 'Tríceps',  sets: sets(3, 12, 15) },
+    ],
+  },
+  {
+    name: 'ABC — B: Costas e Bíceps',
+    exercises: [
+      { name: 'Puxada Frontal na Máquina',       muscle_group: 'Costas',   sets: sets(3, 12, 30) },
+      { name: 'Remada Baixa na Polia',           muscle_group: 'Costas',   sets: sets(3, 12, 25) },
+      { name: 'Remada Unilateral com Halter',    muscle_group: 'Costas',   sets: sets(3, 12, 10) },
+      { name: 'Rosca Direta com Barra',          muscle_group: 'Bíceps',   sets: sets(3, 12, 10) },
+      { name: 'Rosca Alternada com Halteres',    muscle_group: 'Bíceps',   sets: sets(3, 12, 8)  },
+      { name: 'Rosca Martelo',                   muscle_group: 'Bíceps',   sets: sets(3, 12, 8)  },
+    ],
+  },
+  {
+    name: 'ABC — C: Pernas e Abdômen',
+    exercises: [
+      { name: 'Agachamento Livre',               muscle_group: 'Quadríceps', sets: sets(4, 12, 20) },
+      { name: 'Leg Press 45°',                   muscle_group: 'Quadríceps', sets: sets(4, 12, 40) },
+      { name: 'Cadeira Extensora',               muscle_group: 'Quadríceps', sets: sets(3, 15, 20) },
+      { name: 'Stiff com Halteres',              muscle_group: 'Posterior',  sets: sets(3, 12, 15) },
+      { name: 'Cadeira Flexora',                 muscle_group: 'Posterior',  sets: sets(3, 15, 20) },
+      { name: 'Abdominal Crunch',                muscle_group: 'Abdômen',    sets: sets(3, 20, 0)  },
+    ],
+  },
+  // ── 5 Dias — Hipertrofia ─────────────────────────────────────────────────
+  {
+    name: '5 Dias — Segunda: Peito e Tríceps',
+    exercises: [
+      { name: 'Supino Reto com Halteres',        muscle_group: 'Peito',    sets: sets(4, 10, 12) },
+      { name: 'Supino Inclinado com Halteres',   muscle_group: 'Peito',    sets: sets(3, 12, 10) },
+      { name: 'Voador na Máquina (Peck Deck)',   muscle_group: 'Peito',    sets: sets(3, 12, 15) },
+      { name: 'Tríceps Corda na Polia',          muscle_group: 'Tríceps',  sets: sets(3, 12, 15) },
+      { name: 'Tríceps Francês com Halteres',    muscle_group: 'Tríceps',  sets: sets(3, 12, 8)  },
+      { name: 'Mergulho entre Bancos',           muscle_group: 'Tríceps',  sets: sets(3, 12, 0)  },
+    ],
+  },
+  {
+    name: '5 Dias — Terça: Costas e Bíceps',
+    exercises: [
+      { name: 'Puxada Frontal na Máquina',       muscle_group: 'Costas',   sets: sets(4, 10, 32) },
+      { name: 'Remada Baixa na Polia',           muscle_group: 'Costas',   sets: sets(3, 12, 27) },
+      { name: 'Remada Cavalinho',                muscle_group: 'Costas',   sets: sets(3, 12, 20) },
+      { name: 'Rosca Direta com Barra',          muscle_group: 'Bíceps',   sets: sets(3, 12, 10) },
+      { name: 'Rosca Concentrada',               muscle_group: 'Bíceps',   sets: sets(3, 12, 8)  },
+      { name: 'Rosca Martelo com Halteres',      muscle_group: 'Bíceps',   sets: sets(3, 12, 8)  },
+    ],
+  },
+  {
+    name: '5 Dias — Quinta: Pernas e Glúteos',
+    exercises: [
+      { name: 'Agachamento Livre',               muscle_group: 'Quadríceps', sets: sets(4, 10, 25) },
+      { name: 'Leg Press 45°',                   muscle_group: 'Quadríceps', sets: sets(4, 12, 45) },
+      { name: 'Cadeira Extensora',               muscle_group: 'Quadríceps', sets: sets(3, 15, 22) },
+      { name: 'Stiff com Halteres',              muscle_group: 'Posterior',  sets: sets(3, 12, 15) },
+      { name: 'Elevação Pélvica com Barra',      muscle_group: 'Glúteo',     sets: sets(3, 15, 20) },
+      { name: 'Panturrilha em Pé na Máquina',    muscle_group: 'Panturrilha',sets: sets(4, 20, 25) },
+    ],
+  },
+  {
+    name: '5 Dias — Sexta: Ombros e Braços',
+    exercises: [
+      { name: 'Desenvolvimento com Halteres',    muscle_group: 'Ombros',   sets: sets(4, 10, 10) },
+      { name: 'Elevação Lateral',                muscle_group: 'Ombros',   sets: sets(3, 15, 5)  },
+      { name: 'Elevação Frontal',                muscle_group: 'Ombros',   sets: sets(3, 12, 5)  },
+      { name: 'Rosca Alternada com Halteres',    muscle_group: 'Bíceps',   sets: sets(3, 12, 8)  },
+      { name: 'Tríceps Corda na Polia',          muscle_group: 'Tríceps',  sets: sets(3, 12, 15) },
+      { name: 'Tríceps Francês com Halteres',    muscle_group: 'Tríceps',  sets: sets(3, 12, 8)  },
+    ],
+  },
+];
+
+const seedDefaultTemplates = () => {
+  const { count } = db.getFirstSync('SELECT COUNT(*) as count FROM workout_templates');
+  if (count > 0) return;
+  for (const template of DEFAULT_TEMPLATES) {
+    insertTemplate(template);
   }
 };
 
