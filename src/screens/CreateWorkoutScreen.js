@@ -6,6 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import AppAlert from '../components/AppAlert';
@@ -184,6 +186,10 @@ export default function CreateWorkoutScreen({ navigation }) {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.sectionTitle}>Nome do treino</Text>
       <TextInput
@@ -341,6 +347,7 @@ export default function CreateWorkoutScreen({ navigation }) {
         </Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
     </>
   );
 }
