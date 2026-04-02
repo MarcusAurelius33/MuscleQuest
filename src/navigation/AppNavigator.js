@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Image } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import WorkoutListScreen from '../screens/WorkoutListScreen';
 import CreateWorkoutScreen from '../screens/CreateWorkoutScreen';
@@ -8,9 +8,9 @@ import CreateWorkoutScreen from '../screens/CreateWorkoutScreen';
 const Tab = createBottomTabNavigator();
 
 const TAB_ICONS = {
-  Início: '🏠',
-  Histórico: '📋',
-  Registrar: '➕',
+  Início: require('../../assets/icons/inicio.png'),
+  Histórico: require('../../assets/icons/historico.png'),
+  Registrar: require('../../assets/icons/registrar.png'),
 };
 
 export default function AppNavigator() {
@@ -18,8 +18,11 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
-          tabBarIcon: () => (
-            <Text style={{ fontSize: 20 }}>{TAB_ICONS[route.name]}</Text>
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={TAB_ICONS[route.name]}
+              style={{ width: 24, height: 24, opacity: focused ? 1 : 0.45 }}
+            />
           ),
           tabBarActiveTintColor: '#00FF66',
           tabBarInactiveTintColor: '#666666',

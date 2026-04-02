@@ -2,12 +2,13 @@ import { useState, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Alert,
 } from 'react-native';
+import AppAlert from '../components/AppAlert';
 import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { insertWorkoutFull, getWorkoutCountForDate } from '../database/db';
@@ -48,6 +49,10 @@ export default function CreateWorkoutScreen({ navigation }) {
   const [dateBlocked, setDateBlocked] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [exercises, setExercises] = useState([newExercise()]);
+  const [alert, setAlert] = useState(null);
+
+  const showAlert = (title, message) =>
+    setAlert({ title, message, buttons: [{ text: 'OK', onPress: () => setAlert(null) }] });
   const { addXp } = useUserStore();
 
   // Reseta o formulário e reverifica o bloqueio de data toda vez que a aba recebe foco
@@ -124,17 +129,29 @@ export default function CreateWorkoutScreen({ navigation }) {
 
   const handleSave = () => {
     if (!workoutName.trim()) {
-      Alert.alert('Atenção', 'Dê um nome ao treino.');
+      showAlert('Atenção', 'Dê um nome ao treino.');
       return;
     }
     for (const ex of exercises) {
       if (!ex.name.trim()) {
-        Alert.alert('Atenção', 'Preencha o nome de todos os exercícios.');
+        showAlert('Atenção', 'Preencha o nome de todos os exercícios.');
         return;
+      }
+      for (const s of ex.sets) {
+        const reps = Number(s.reps);
+        const weight = s.weight;
+        if (s.reps === '' || weight === '') {
+          showAlert('Atenção', 'Preencha os campos de repetição e carga de todas as séries.');
+          return;
+        }
+        if (reps === 0) {
+          showAlert('Atenção', 'O número de repetições para uma série não pode ser 0.');
+          return;
+        }
       }
     }
     if (dateBlocked) {
-      Alert.alert('Dia ocupado', 'Já existe um treino registrado nessa data. Escolha outro dia.');
+      showAlert('Dia ocupado', 'Já existe um treino registrado nessa data. Escolha outro dia.');
       return;
     }
 
@@ -155,11 +172,18 @@ export default function CreateWorkoutScreen({ navigation }) {
       }
       navigation.navigate('Histórico');
     } else {
-      Alert.alert('Erro', 'Não foi possível salvar o treino. Tente novamente.');
+      showAlert('Erro', 'Não foi possível salvar o treino. Tente novamente.');
     }
   };
 
   return (
+    <>
+    <AppAlert
+      visible={!!alert}
+      title={alert?.title}
+      message={alert?.message}
+      buttons={alert?.buttons ?? []}
+    />
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.sectionTitle}>Nome do treino</Text>
       <TextInput
@@ -176,7 +200,7 @@ export default function CreateWorkoutScreen({ navigation }) {
         style={[styles.dateButton, dateBlocked && styles.dateButtonBlocked]}
         onPress={() => setShowDatePicker(true)}
       >
-        <Text style={styles.dateButtonIcon}>📅</Text>
+        <Image source={require('../../assets/icons/calendario.png')} style={styles.dateButtonIcon} />
         <Text style={[styles.dateButtonText, dateBlocked && styles.dateButtonTextBlocked]}>
           {toDisplayDate(date)}
         </Text>
@@ -317,6 +341,7 @@ export default function CreateWorkoutScreen({ navigation }) {
         </Text>
       </TouchableOpacity>
     </ScrollView>
+    </>
   );
 }
 
@@ -356,7 +381,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF444415',
   },
   dateButtonIcon: {
-    fontSize: 18,
+    width: 22,
+    height: 22,
   },
   dateButtonText: {
     color: '#FFFFFF',

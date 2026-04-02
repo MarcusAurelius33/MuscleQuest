@@ -5,17 +5,21 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getAllWorkoutsWithDetails, markWorkoutCompleted, deleteWorkout } from '../database/db';
 import useUserStore from '../store/useUserStore';
+import AppAlert from '../components/AppAlert';
 
 const XP_PER_WORKOUT = 20;
 
 export default function WorkoutListScreen() {
   const [workouts, setWorkouts] = useState([]);
+  const [alert, setAlert] = useState(null);
   const { addXp, removeXp } = useUserStore();
+
+  const showAlert = (title, message, buttons) => setAlert({ title, message, buttons });
+  const hideAlert = () => setAlert(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -27,25 +31,26 @@ export default function WorkoutListScreen() {
     const wasCompleted = workout.status === 'completed';
     const xpEarned = workout.xpEarned || 0;
 
-    Alert.alert(
+    showAlert(
       'Excluir treino',
       wasCompleted
         ? `Excluir "${workout.name}"? Você perderá ${xpEarned} XP.`
         : `Excluir "${workout.name}"? O dia ficará livre para outro treino.`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel', onPress: hideAlert },
         {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => {
+            hideAlert();
             const ok = deleteWorkout(workout.id);
             if (ok) {
-              if (wasCompleted) {
-                removeXp(xpEarned);
-              }
+              if (wasCompleted) removeXp(xpEarned);
               setWorkouts(getAllWorkoutsWithDetails());
             } else {
-              Alert.alert('Erro', 'Não foi possível excluir o treino.');
+              showAlert('Erro', 'Não foi possível excluir o treino.', [
+                { text: 'OK', onPress: hideAlert },
+              ]);
             }
           },
         },
@@ -54,14 +59,15 @@ export default function WorkoutListScreen() {
   };
 
   const handleComplete = (workout) => {
-    Alert.alert(
+    showAlert(
       'Concluir treino',
       `Marcar "${workout.name}" como concluído? Você ganha ${XP_PER_WORKOUT} XP!`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel', onPress: hideAlert },
         {
           text: 'Concluir',
           onPress: () => {
+            hideAlert();
             markWorkoutCompleted(workout.id, XP_PER_WORKOUT);
             addXp(XP_PER_WORKOUT);
             setWorkouts(getAllWorkoutsWithDetails());
@@ -81,6 +87,13 @@ export default function WorkoutListScreen() {
   }
 
   return (
+    <>
+    <AppAlert
+      visible={!!alert}
+      title={alert?.title}
+      message={alert?.message}
+      buttons={alert?.buttons ?? []}
+    />
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {workouts.map((workout) => (
         <View key={workout.id} style={styles.card}>
@@ -134,6 +147,7 @@ export default function WorkoutListScreen() {
         </View>
       ))}
     </ScrollView>
+    </>
   );
 }
 

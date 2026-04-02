@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 
 export default function StatCard({ title, value, icon, color = '#FF6B00' }) {
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
-      <Text style={styles.icon}>{icon}</Text>
+      <Image source={icon} style={styles.icon} />
       <View>
         <Text style={styles.title}>{title}</Text>
         <Text style={[styles.value, { color }]}>{value}</Text>
@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   icon: {
-    fontSize: 28,
+    width: 36,
+    height: 36,
   },
   title: {
     color: '#999999',

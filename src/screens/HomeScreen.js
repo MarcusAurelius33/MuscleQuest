@@ -49,8 +49,8 @@ export default function HomeScreen() {
 
       {/* Streak e Meta */}
       <View style={styles.cards}>
-        <StatCard title="Sequência" value={`${dbStreak} dias`} icon="🔥" color="#FF6B00" />
-        <StatCard title="Meta semanal" value={`${weeklyCount}/${weeklyGoal}`} icon="🎯" color="#00BFFF" />
+        <StatCard title="Sequência" value={`${dbStreak} dias`} icon={require('../../assets/icons/streak.png')} color="#FF6B00" />
+        <StatCard title="Meta semanal" value={`${weeklyCount}/${weeklyGoal}`} icon={require('../../assets/icons/meta.png')} color="#00BFFF" />
       </View>
 
       {/* Progresso da meta */}
