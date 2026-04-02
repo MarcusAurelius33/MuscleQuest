@@ -170,14 +170,14 @@ const styles = StyleSheet.create({
   },
   editButton: {
     flex: 1,
-    backgroundColor: '#00FF6620',
+    backgroundColor: '#00BFFF20',
     borderWidth: 1,
-    borderColor: '#00FF6660',
+    borderColor: '#00BFFF60',
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
   },
-  editButtonText: { color: '#00FF66', fontSize: 13, fontWeight: 'bold' },
+  editButtonText: { color: '#00BFFF', fontSize: 13, fontWeight: 'bold' },
   deleteButton: {
     flex: 1,
     borderWidth: 1,
