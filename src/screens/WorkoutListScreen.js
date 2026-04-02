@@ -42,6 +42,7 @@ function getDateRange(filter) {
 export default function WorkoutListScreen() {
   const [workouts, setWorkouts] = useState([]);
   const [filter, setFilter] = useState('Geral');
+  const [expandedId, setExpandedId] = useState(null);
   const [alert, setAlert] = useState(null);
   const { addXp, removeXp } = useUserStore();
 
@@ -137,57 +138,70 @@ export default function WorkoutListScreen() {
       </View>
     ) : (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {workouts.map((workout) => (
+      {workouts.map((workout) => {
+        const isExpanded = expandedId === workout.id;
+        return (
         <View key={workout.id} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View>
+          <TouchableOpacity
+            style={styles.cardHeader}
+            onPress={() => setExpandedId(isExpanded ? null : workout.id)}
+            activeOpacity={0.7}
+          >
+            <View style={{ flex: 1 }}>
               <Text style={styles.workoutName}>{workout.name}</Text>
               <Text style={styles.workoutDate}>{formatDate(workout.date)}</Text>
             </View>
-            <View
-              style={[
-                styles.badge,
-                workout.status === 'completed' ? styles.badgeDone : styles.badgePlanned,
-              ]}
-            >
-              <Text style={styles.badgeText}>
-                {workout.status === 'completed' ? 'Concluído' : 'Planejado'}
-              </Text>
-            </View>
-          </View>
-
-          {workout.exercises.map((ex) => (
-            <View key={ex.id} style={styles.exercise}>
-              <Text style={styles.exerciseName}>
-                {ex.name}{' '}
-                <Text style={styles.muscleGroup}>({ex.muscle_group})</Text>
-              </Text>
-              {ex.sets.map((s) => (
-                <Text key={s.id} style={styles.setRow}>
-                  Série {s.set_number}: {s.reps} rep × {s.weight} kg
-                </Text>
-              ))}
-            </View>
-          ))}
-
-          <View style={styles.actions}>
-            {workout.status === 'planned' && workout.date <= new Date().toISOString().split('T')[0] && (
-              <TouchableOpacity
-                style={styles.completeButton}
-                onPress={() => handleComplete(workout)}
+            <View style={styles.cardHeaderRight}>
+              <View
+                style={[
+                  styles.badge,
+                  workout.status === 'completed' ? styles.badgeDone : styles.badgePlanned,
+                ]}
               >
-                <Text style={styles.completeButtonText}>Marcar como concluído</Text>
+                <Text style={styles.badgeText}>
+                  {workout.status === 'completed' ? 'Concluído' : 'Planejado'}
+                </Text>
+              </View>
+              <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
+            </View>
+          </TouchableOpacity>
+
+          {isExpanded && (
+            <>
+            {workout.exercises.map((ex) => (
+              <View key={ex.id} style={styles.exercise}>
+                <Text style={styles.exerciseName}>
+                  {ex.name}{' '}
+                  <Text style={styles.muscleGroup}>({ex.muscle_group})</Text>
+                </Text>
+                {ex.sets.map((s) => (
+                  <Text key={s.id} style={styles.setRow}>
+                    Série {s.set_number}: {s.reps} rep × {s.weight} kg
+                  </Text>
+                ))}
+              </View>
+            ))}
+            <View style={styles.actions}>
+              {workout.status === 'planned' && workout.date <= new Date().toISOString().split('T')[0] && (
+                <TouchableOpacity
+                  style={styles.completeButton}
+                  onPress={() => handleComplete(workout)}
+                >
+                  <Text style={styles.completeButtonText}>Marcar como concluído</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDelete(workout)}
+              >
+                <Text style={styles.deleteButtonText}>Excluir</Text>
               </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDelete(workout)}
-            >
-              <Text style={styles.deleteButtonText}>Excluir</Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+            </>
+          )}
         </View>
-      ))}
+        );
+      })}
     </ScrollView>
     )}
     </>
@@ -255,7 +269,16 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chevron: {
+    color: '#666666',
+    fontSize: 11,
   },
   workoutName: {
     color: '#FFFFFF',
