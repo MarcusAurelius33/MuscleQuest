@@ -234,8 +234,9 @@ export default function CreateWorkoutScreen({ navigation }) {
     </Modal>
 
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: '#1A1A1A' }}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === 'android' ? 110 : 0}
     >
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {templates.length > 0 ? (
@@ -495,7 +496,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 14,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   sectionTitle: {
     color: '#CCCCCC',
