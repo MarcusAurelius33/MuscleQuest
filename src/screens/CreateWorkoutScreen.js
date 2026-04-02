@@ -3,6 +3,7 @@ import {
   View,
   Text,
   Image,
+  Modal,
   TextInput,
   TouchableOpacity,
   ScrollView,
@@ -13,7 +14,7 @@ import {
 import AppAlert from '../components/AppAlert';
 import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { insertWorkoutFull, getWorkoutCountForDate } from '../database/db';
+import { insertWorkoutFull, getWorkoutCountForDate, getAllTemplates } from '../database/db';
 import useUserStore from '../store/useUserStore';
 
 const XP_PER_WORKOUT = 20;
@@ -52,6 +53,8 @@ export default function CreateWorkoutScreen({ navigation }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [exercises, setExercises] = useState([newExercise()]);
   const [alert, setAlert] = useState(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templates, setTemplates] = useState([]);
 
   const showAlert = (title, message) =>
     setAlert({ title, message, buttons: [{ text: 'OK', onPress: () => setAlert(null) }] });
@@ -67,8 +70,21 @@ export default function CreateWorkoutScreen({ navigation }) {
       setIsCompleted(false);
       setExercises([newExercise()]);
       setDateBlocked(getWorkoutCountForDate(toStorageDate(today)) > 0);
+      setTemplates(getAllTemplates());
     }, [])
   );
+
+  const applyTemplate = (t) => {
+    setWorkoutName(t.name);
+    setExercises(
+      t.exercises.map((ex) => ({
+        name: ex.name,
+        muscle_group: ex.muscle_group,
+        sets: ex.sets.map((s) => ({ reps: String(s.reps), weight: String(s.weight) })),
+      }))
+    );
+    setShowTemplates(false);
+  };
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -186,11 +202,47 @@ export default function CreateWorkoutScreen({ navigation }) {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
+    {/* Modal de seleção de treino padrão */}
+    <Modal transparent animationType="slide" visible={showTemplates} statusBarTranslucent>
+      <View style={styles.templateBackdrop}>
+        <View style={styles.templateSheet}>
+          <Text style={styles.templateSheetTitle}>Treinos padrão</Text>
+          {templates.length === 0 ? (
+            <Text style={styles.templateEmpty}>Nenhum treino padrão criado ainda.</Text>
+          ) : (
+            <ScrollView style={styles.templateList}>
+              {templates.map((t) => (
+                <TouchableOpacity
+                  key={t.id}
+                  style={styles.templateItem}
+                  onPress={() => applyTemplate(t)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.templateItemName}>{t.name}</Text>
+                  <Text style={styles.templateItemSub}>
+                    {t.exercises.length} {t.exercises.length === 1 ? 'exercício' : 'exercícios'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+          <TouchableOpacity style={styles.templateCancelBtn} onPress={() => setShowTemplates(false)}>
+            <Text style={styles.templateCancelText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      {templates.length > 0 && (
+        <TouchableOpacity style={styles.useTemplateBtn} onPress={() => setShowTemplates(true)}>
+          <Text style={styles.useTemplateBtnText}>Usar treino padrão</Text>
+        </TouchableOpacity>
+      )}
       <Text style={styles.sectionTitle}>Nome do treino</Text>
       <TextInput
         style={styles.input}
@@ -353,6 +405,73 @@ export default function CreateWorkoutScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  useTemplateBtn: {
+    borderWidth: 1,
+    borderColor: '#00FF6660',
+    borderRadius: 10,
+    padding: 12,
+    alignItems: 'center',
+  },
+  useTemplateBtnText: {
+    color: '#00FF66',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  templateBackdrop: {
+    flex: 1,
+    backgroundColor: '#000000AA',
+    justifyContent: 'flex-end',
+  },
+  templateSheet: {
+    backgroundColor: '#1E1E1E',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '70%',
+    gap: 12,
+  },
+  templateSheetTitle: {
+    color: '#00FF66',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  templateEmpty: {
+    color: '#666666',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  templateList: {
+    flexGrow: 0,
+  },
+  templateItem: {
+    backgroundColor: '#2A2A2A',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+  },
+  templateItemName: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  templateItemSub: {
+    color: '#888888',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  templateCancelBtn: {
+    backgroundColor: '#2A2A2A',
+    borderRadius: 10,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  templateCancelText: {
+    color: '#AAAAAA',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   container: {
     flex: 1,
     backgroundColor: '#1A1A1A',

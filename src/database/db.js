@@ -31,6 +31,28 @@ export const initDb = () => {
         weight REAL NOT NULL,
         FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
       );
+
+      CREATE TABLE IF NOT EXISTS workout_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS template_exercises (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        template_id INTEGER,
+        name TEXT NOT NULL,
+        muscle_group TEXT NOT NULL,
+        FOREIGN KEY (template_id) REFERENCES workout_templates(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS template_sets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exercise_id INTEGER,
+        set_number INTEGER NOT NULL,
+        reps INTEGER NOT NULL,
+        weight REAL NOT NULL,
+        FOREIGN KEY (exercise_id) REFERENCES template_exercises(id)
+      );
     `);
     console.log('Banco de dados inicializado com sucesso.');
   } catch (error) {
@@ -215,4 +237,67 @@ export const getAllExerciseProgress = () => {
     }
   }
   return results;
+};
+
+// ── Templates ──────────────────────────────────────────────────────────────
+
+export const insertTemplate = ({ name, exercises }) => {
+  try {
+    const tmpl = db.prepareSync('INSERT INTO workout_templates (name) VALUES (?)');
+    tmpl.executeSync([name.trim()]);
+    tmpl.finalizeSync();
+    const { id: templateId } = db.getFirstSync('SELECT last_insert_rowid() as id');
+    for (const ex of exercises) {
+      const exStm = db.prepareSync(
+        'INSERT INTO template_exercises (template_id, name, muscle_group) VALUES (?, ?, ?)'
+      );
+      exStm.executeSync([templateId, ex.name.trim(), ex.muscle_group]);
+      exStm.finalizeSync();
+      const { id: exId } = db.getFirstSync('SELECT last_insert_rowid() as id');
+      ex.sets.forEach((s, i) => {
+        const setStm = db.prepareSync(
+          'INSERT INTO template_sets (exercise_id, set_number, reps, weight) VALUES (?, ?, ?, ?)'
+        );
+        setStm.executeSync([exId, i + 1, Number(s.reps), Number(s.weight)]);
+        setStm.finalizeSync();
+      });
+    }
+    return true;
+  } catch (e) {
+    console.error('Erro ao salvar template:', e);
+    return false;
+  }
+};
+
+export const getAllTemplates = () => {
+  if (!db) return [];
+  const templates = db.getAllSync('SELECT * FROM workout_templates ORDER BY id DESC');
+  for (const t of templates) {
+    t.exercises = db.getAllSync(
+      'SELECT * FROM template_exercises WHERE template_id = ?', [t.id]
+    );
+    for (const ex of t.exercises) {
+      ex.sets = db.getAllSync(
+        'SELECT * FROM template_sets WHERE exercise_id = ? ORDER BY set_number', [ex.id]
+      );
+    }
+  }
+  return templates;
+};
+
+export const deleteTemplate = (id) => {
+  try {
+    const exercises = db.getAllSync(
+      'SELECT id FROM template_exercises WHERE template_id = ?', [id]
+    );
+    for (const ex of exercises) {
+      db.runSync('DELETE FROM template_sets WHERE exercise_id = ?', [ex.id]);
+    }
+    db.runSync('DELETE FROM template_exercises WHERE template_id = ?', [id]);
+    db.runSync('DELETE FROM workout_templates WHERE id = ?', [id]);
+    return true;
+  } catch (e) {
+    console.error('Erro ao excluir template:', e);
+    return false;
+  }
 };
