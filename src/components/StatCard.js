@@ -1,15 +1,19 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function StatCard({ title, value, icon, color = '#FF6B00' }) {
+export default function StatCard({ title, value, icon, color = '#FF6B00', onPress }) {
   return (
-    <View style={[styles.card, { borderLeftColor: color }]}>
+    <TouchableOpacity
+      style={[styles.card, { borderLeftColor: color }]}
+      onPress={onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+    >
       <Image source={icon} style={styles.icon} />
       <View>
         <Text style={styles.title}>{title}</Text>
         <Text style={[styles.value, { color }]}>{value}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

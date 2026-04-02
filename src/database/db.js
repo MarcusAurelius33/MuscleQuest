@@ -124,6 +124,14 @@ export const getWorkoutCountForDate = (date) => {
   return result ? result.count : 0;
 };
 
+export const getCompletedWorkoutsForWeek = (startDate, endDate) => {
+  if (!db) return [];
+  return db.getAllSync(
+    "SELECT id, name, date FROM workouts WHERE status = 'completed' AND date >= ? AND date <= ? ORDER BY date ASC",
+    [startDate, endDate]
+  );
+};
+
 export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
   if (!db) return 0;
   const result = db.getFirstSync(
@@ -134,24 +142,25 @@ export const getWorkoutsCountBetweenDates = (startDate, endDate) => {
 };
 
 export const getStreak = () => {
-  if (!db) return 0;
+  if (!db) return { count: 0, startDate: null };
   const rows = db.getAllSync(
     "SELECT DISTINCT date FROM workouts WHERE status = 'completed' ORDER BY date DESC"
   );
-  if (rows.length === 0) return 0;
+  if (rows.length === 0) return { count: 0, startDate: null };
 
   const toYMD = (d) => d.toISOString().split('T')[0];
   const today = toYMD(new Date());
   const yesterday = toYMD(new Date(Date.now() - 86400000));
 
-  // Sequência só é válida se o treino mais recente foi hoje ou ontem
-  if (rows[0].date !== today && rows[0].date !== yesterday) return 0;
+  if (rows[0].date !== today && rows[0].date !== yesterday) return { count: 0, startDate: null };
 
-  let streak = 0;
+  let count = 0;
   let expected = rows[0].date;
+  let startDate = rows[0].date;
   for (const row of rows) {
     if (row.date === expected) {
-      streak++;
+      count++;
+      startDate = row.date;
       const d = new Date(expected + 'T12:00:00Z');
       d.setUTCDate(d.getUTCDate() - 1);
       expected = toYMD(d);
@@ -159,7 +168,7 @@ export const getStreak = () => {
       break;
     }
   }
-  return streak;
+  return { count, startDate };
 };
 
 export const getAllExerciseProgress = () => {
