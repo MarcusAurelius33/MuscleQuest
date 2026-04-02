@@ -124,10 +124,10 @@ export const getWorkoutCountForDate = (date) => {
   return result ? result.count : 0;
 };
 
-export const getCompletedWorkoutsForWeek = (startDate, endDate) => {
+export const getWorkoutsForWeek = (startDate, endDate) => {
   if (!db) return [];
   return db.getAllSync(
-    "SELECT id, name, date FROM workouts WHERE status = 'completed' AND date >= ? AND date <= ? ORDER BY date ASC",
+    'SELECT id, name, date, status FROM workouts WHERE date >= ? AND date <= ? ORDER BY date ASC',
     [startDate, endDate]
   );
 };

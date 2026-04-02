@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import useUserStore from '../store/useUserStore';
 import ProgressBar from '../components/ProgressBar';
 import StatCard from '../components/StatCard';
-import { getAllExerciseProgress, getWorkoutsCountBetweenDates, getCompletedWorkoutsForWeek, getStreak } from '../database/db';
+import { getAllExerciseProgress, getWorkoutsCountBetweenDates, getWorkoutsForWeek, getStreak } from '../database/db';
 
 export default function HomeScreen() {
   const { level, xp, weeklyGoal, setWeeklyGoal } = useUserStore();
@@ -33,13 +33,12 @@ export default function HomeScreen() {
       const start = fmt(monday);
       const end = fmt(sunday);
       setWeeklyCount(getWorkoutsCountBetweenDates(start, end));
-      setWeeklyWorkouts(getCompletedWorkoutsForWeek(start, end));
+      setWeeklyWorkouts(getWorkoutsForWeek(start, end));
     }, [])
   );
 
   const xpNeeded = level * 100;
   const xpProgress = Math.round((xp / xpNeeded) * 100);
-  const weeklyProgress = Math.round((weeklyCount / weeklyGoal) * 100);
 
   const formatDate = (ymd) => {
     if (!ymd) return '';
@@ -138,28 +137,28 @@ export default function HomeScreen() {
       {weeklyWorkouts.length > 0 && (
         <View style={styles.weekSection}>
           <Text style={styles.weekTitle}>Treinos desta semana</Text>
-          {weeklyWorkouts.map((w) => (
-            <View key={w.id} style={styles.weekCard}>
-              <View style={styles.weekDot} />
-              <View>
-                <Text style={styles.weekWorkoutName}>{w.name}</Text>
-                <Text style={styles.weekWorkoutDate}>{formatDate(w.date)}</Text>
+          {weeklyWorkouts.map((w) => {
+            const done = w.status === 'completed';
+            return (
+              <View key={w.id} style={styles.weekCard}>
+                <View style={[styles.weekDot, { backgroundColor: done ? '#00FF66' : '#FF6B00' }]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.weekWorkoutName}>{w.name}</Text>
+                  <Text style={styles.weekWorkoutDate}>{formatDate(w.date)}</Text>
+                </View>
+                <Text style={[styles.weekBadge, { color: done ? '#00FF66' : '#FF6B00' }]}>
+                  {done ? 'Concluído' : 'Planejado'}
+                </Text>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
 
-      {/* Desempenho */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Desempenho</Text>
-        <ProgressBar progress={weeklyProgress} color="#00BFFF" />
-      </View>
-
-      {/* Cards de variação por exercício */}
+      {/* Desempenho (variação de carga) */}
       {progressList.length > 0 && (
         <View style={styles.progressSection}>
-          <Text style={styles.progressSectionTitle}>Variação de carga</Text>
+          <Text style={styles.progressSectionTitle}>Desempenho</Text>
           {progressList.map((item) => {
             const isExpanded = expandedCard === item.exerciseName;
             const accentColor = item.improved ? '#00FF66' : '#FF4444';
@@ -340,6 +339,10 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 12,
     marginTop: 2,
+  },
+  weekBadge: {
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   backdrop: {
     flex: 1,
