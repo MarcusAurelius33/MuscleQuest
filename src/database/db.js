@@ -78,9 +78,11 @@ export const insertWorkoutFull = (workoutData) => {
   }
 };
 
-export const getAllWorkoutsWithDetails = () => {
+export const getAllWorkoutsWithDetails = (startDate = null, endDate = null) => {
   if (!db) return [];
-  const workouts = db.getAllSync('SELECT * FROM workouts ORDER BY id DESC');
+  const workouts = startDate && endDate
+    ? db.getAllSync('SELECT * FROM workouts WHERE date >= ? AND date <= ? ORDER BY date DESC', [startDate, endDate])
+    : db.getAllSync('SELECT * FROM workouts ORDER BY date DESC');
   for (const w of workouts) {
     w.exercises = db.getAllSync('SELECT * FROM exercises WHERE workout_id = ?', [w.id]);
     for (const ex of w.exercises) {

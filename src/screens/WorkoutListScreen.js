@@ -13,18 +13,45 @@ import AppAlert from '../components/AppAlert';
 
 const XP_PER_WORKOUT = 20;
 
+const FILTERS = ['Semana', 'Mês', 'Geral'];
+
+function getDateRange(filter) {
+  const fmt = (d) => d.toISOString().split('T')[0];
+  const now = new Date();
+  if (filter === 'Semana') {
+    const day = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((day + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return [fmt(monday), fmt(sunday)];
+  }
+  if (filter === 'Mês') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return [fmt(start), fmt(end)];
+  }
+  return [null, null];
+}
+
 export default function WorkoutListScreen() {
   const [workouts, setWorkouts] = useState([]);
+  const [filter, setFilter] = useState('Geral');
   const [alert, setAlert] = useState(null);
   const { addXp, removeXp } = useUserStore();
 
   const showAlert = (title, message, buttons) => setAlert({ title, message, buttons });
   const hideAlert = () => setAlert(null);
 
+  const loadWorkouts = useCallback((activeFilter) => {
+    const [start, end] = getDateRange(activeFilter);
+    setWorkouts(getAllWorkoutsWithDetails(start, end));
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      setWorkouts(getAllWorkoutsWithDetails());
-    }, [])
+      loadWorkouts(filter);
+    }, [filter, loadWorkouts])
   );
 
   const handleDelete = (workout) => {
@@ -46,7 +73,7 @@ export default function WorkoutListScreen() {
             const ok = deleteWorkout(workout.id);
             if (ok) {
               if (wasCompleted) removeXp(xpEarned);
-              setWorkouts(getAllWorkoutsWithDetails());
+              loadWorkouts(filter);
             } else {
               showAlert('Erro', 'Não foi possível excluir o treino.', [
                 { text: 'OK', onPress: hideAlert },
@@ -70,21 +97,12 @@ export default function WorkoutListScreen() {
             hideAlert();
             markWorkoutCompleted(workout.id, XP_PER_WORKOUT);
             addXp(XP_PER_WORKOUT);
-            setWorkouts(getAllWorkoutsWithDetails());
+            loadWorkouts(filter);
           },
         },
       ]
     );
   };
-
-  if (workouts.length === 0) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Nenhum treino registrado ainda.</Text>
-        <Text style={styles.emptySubtext}>Use a aba "Registrar" para começar!</Text>
-      </View>
-    );
-  }
 
   return (
     <>
@@ -94,6 +112,25 @@ export default function WorkoutListScreen() {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
+    <View style={styles.filterRow}>
+      {FILTERS.map((f) => (
+        <TouchableOpacity
+          key={f}
+          style={[styles.filterButton, filter === f && styles.filterButtonActive]}
+          onPress={() => { setFilter(f); loadWorkouts(f); }}
+        >
+          <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+    {workouts.length === 0 ? (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Nenhum treino encontrado.</Text>
+        <Text style={styles.emptySubtext}>
+          {filter === 'Geral' ? 'Use a aba "Registrar" para começar!' : `Nenhum treino registrado neste ${filter === 'Semana' ? 'semana' : 'mês'}.`}
+        </Text>
+      </View>
+    ) : (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {workouts.map((workout) => (
         <View key={workout.id} style={styles.card}>
@@ -147,11 +184,39 @@ export default function WorkoutListScreen() {
         </View>
       ))}
     </ScrollView>
+    )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  filterRow: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A1A',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  filterButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#222222',
+  },
+  filterButtonActive: {
+    backgroundColor: '#00FF6620',
+    borderWidth: 1,
+    borderColor: '#00FF6660',
+  },
+  filterText: {
+    color: '#666666',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  filterTextActive: {
+    color: '#00FF66',
+  },
   container: {
     flex: 1,
     backgroundColor: '#1A1A1A',
