@@ -13,6 +13,11 @@ import AppAlert from '../components/AppAlert';
 
 const XP_PER_WORKOUT = 20;
 
+const formatDate = (ymd) => {
+  const [year, month, day] = ymd.split('-');
+  return `${day}/${month}/${year}`;
+};
+
 const FILTERS = ['Semana', 'Mês', 'Geral'];
 
 function getDateRange(filter) {
@@ -137,7 +142,7 @@ export default function WorkoutListScreen() {
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.workoutName}>{workout.name}</Text>
-              <Text style={styles.workoutDate}>{workout.date}</Text>
+              <Text style={styles.workoutDate}>{formatDate(workout.date)}</Text>
             </View>
             <View
               style={[
