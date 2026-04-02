@@ -121,7 +121,7 @@ export default function CreateTemplateScreen({ navigation, route }) {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 80 : 0}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#1A1A1A' }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 110 : 0}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <Text style={styles.sectionTitle}>Nome do treino padrão</Text>
       <TextInput
