@@ -588,10 +588,12 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     flex: 1,
-    padding: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: '#2A2A2A',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   toggleActive: {
     backgroundColor: '#FF6B0030',
@@ -609,6 +611,8 @@ const styles = StyleSheet.create({
   toggleText: {
     color: '#888888',
     fontWeight: '600',
+    fontSize: 13,
+    textAlign: 'center',
   },
   toggleTextActive: {
     color: '#FFFFFF',
