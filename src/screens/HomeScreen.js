@@ -6,6 +6,36 @@ import ProgressBar from '../components/ProgressBar';
 import StatCard from '../components/StatCard';
 import { getAllExerciseProgress, getWorkoutsCountBetweenDates, getWorkoutsForWeek, getStreak } from '../database/db';
 
+const LEVEL_TABLE = [
+  { min: 1,   max: 3,        title: 'Frango de Granja' },
+  { min: 4,   max: 6,        title: 'Chassi de Grilo' },
+  { min: 7,   max: 10,       title: 'Projeto Verão' },
+  { min: 11,  max: 15,       title: 'Falso Magro' },
+  { min: 16,  max: 20,       title: 'Levantador de Celular' },
+  { min: 21,  max: 30,       title: 'Rato de Academia Júnior' },
+  { min: 31,  max: 40,       title: 'Geladeira Electrolux' },
+  { min: 41,  max: 50,       title: 'Guarda-Roupa de Carvalho' },
+  { min: 51,  max: 60,       title: 'Mutante em Treinamento' },
+  { min: 61,  max: 80,       title: 'Titã de Aço' },
+  { min: 81,  max: 99,       title: 'Dono da Academia' },
+  { min: 100, max: Infinity, title: 'Herdeiro do Olimpo' },
+];
+
+function getLevelTitle(level) {
+  if (level <= 3)  return 'Frango de Granja';
+  if (level <= 6)  return 'Chassi de Grilo';
+  if (level <= 10) return 'Projeto Verão';
+  if (level <= 15) return 'Falso Magro';
+  if (level <= 20) return 'Levantador de Celular';
+  if (level <= 30) return 'Rato de Academia Júnior';
+  if (level <= 40) return 'Geladeira Electrolux';
+  if (level <= 50) return 'Guarda-Roupa de Carvalho';
+  if (level <= 60) return 'Mutante em Treinamento';
+  if (level <= 80) return 'Titã de Aço';
+  if (level <= 99) return 'Dono da Academia';
+  return 'Herdeiro do Olimpo';
+}
+
 export default function HomeScreen() {
   const { level, xp, weeklyGoal, setWeeklyGoal } = useUserStore();
   const [progressList, setProgressList] = useState([]);
@@ -15,6 +45,7 @@ export default function HomeScreen() {
   const [expandedCard, setExpandedCard] = useState(null);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
+  const [showLevelsModal, setShowLevelsModal] = useState(false);
   const [goalInput, setGoalInput] = useState('');
 
   useFocusEffect(
@@ -59,13 +90,42 @@ export default function HomeScreen() {
       <Text style={styles.title}>MuscleQuest</Text>
 
       {/* Level e XP */}
-      <View style={styles.section}>
+      <TouchableOpacity style={styles.section} onPress={() => setShowLevelsModal(true)} activeOpacity={0.7}>
         <View style={styles.row}>
-          <Text style={styles.label}>Nível {level}</Text>
+          <View>
+            <Text style={styles.label}>Nível {level}</Text>
+            <Text style={styles.levelTitle}>{getLevelTitle(level)}</Text>
+          </View>
           <Text style={styles.xpText}>{xp} / {xpNeeded} XP</Text>
         </View>
         <ProgressBar progress={xpProgress} color="#00FF66" />
-      </View>
+      </TouchableOpacity>
+
+      {/* Modal tabela de níveis */}
+      <Modal transparent animationType="fade" visible={showLevelsModal} statusBarTranslucent>
+        <View style={styles.backdrop}>
+          <View style={[styles.modalBox, styles.levelsModalBox]}>
+            <Text style={styles.modalTitle}>Tabela de Níveis</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {LEVEL_TABLE.map((row) => {
+                const isCurrent = level >= row.min && level <= row.max;
+                return (
+                  <View key={row.min} style={[styles.levelRow, isCurrent && styles.levelRowActive]}>
+                    <Text style={[styles.levelRange, isCurrent && styles.levelRangeActive]}>
+                      {row.max === Infinity ? `${row.min}+` : row.min === row.max ? `${row.min}` : `${row.min}–${row.max}`}
+                    </Text>
+                    <View style={styles.levelRowDivider} />
+                    <Text style={[styles.levelName, isCurrent && styles.levelNameActive]}>{row.title}</Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <TouchableOpacity style={styles.modalButton} onPress={() => setShowLevelsModal(false)}>
+              <Text style={styles.modalButtonText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modais */}
       <Modal transparent animationType="fade" visible={showStreakModal} statusBarTranslucent>
@@ -238,6 +298,53 @@ const styles = StyleSheet.create({
   label: {
     color: '#CCCCCC',
     fontSize: 14,
+  },
+  levelTitle: {
+    color: '#00FF66',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  levelsModalBox: {
+    maxHeight: '80%',
+  },
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A2A2A',
+    gap: 12,
+  },
+  levelRowActive: {
+    backgroundColor: '#00FF6610',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    marginHorizontal: -6,
+  },
+  levelRange: {
+    color: '#555555',
+    fontSize: 12,
+    fontWeight: 'bold',
+    width: 44,
+    textAlign: 'center',
+  },
+  levelRangeActive: {
+    color: '#00FF66',
+  },
+  levelRowDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: '#2A2A2A',
+  },
+  levelName: {
+    color: '#AAAAAA',
+    fontSize: 13,
+    flex: 1,
+  },
+  levelNameActive: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   xpText: {
     color: '#00FF66',
