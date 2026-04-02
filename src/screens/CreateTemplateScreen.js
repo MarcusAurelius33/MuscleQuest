@@ -121,8 +121,8 @@ export default function CreateTemplateScreen({ navigation, route }) {
       message={alert?.message}
       buttons={alert?.buttons ?? []}
     />
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 80 : 0}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <Text style={styles.sectionTitle}>Nome do treino padrão</Text>
       <TextInput
         style={styles.input}
@@ -225,7 +225,7 @@ export default function CreateTemplateScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A1A1A' },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  content: { padding: 16, gap: 16, paddingBottom: 120 },
   sectionTitle: { color: '#888888', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
   input: { backgroundColor: '#222222', borderRadius: 8, padding: 12, color: '#FFFFFF', fontSize: 15, borderWidth: 1, borderColor: '#2A2A2A' },
   exerciseCard: { backgroundColor: '#222222', borderRadius: 10, padding: 14, gap: 10 },
