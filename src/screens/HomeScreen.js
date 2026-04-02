@@ -199,19 +199,19 @@ export default function HomeScreen() {
         {weeklyWorkouts.length === 0 ? (
           <View style={styles.weekEmpty}>
             <Text style={styles.weekEmptyText}>Nenhum treino esta semana.</Text>
-            <Text style={styles.weekEmptyHint}>Acesse a aba Registrar para planejar sua semana.</Text>
+            <Text style={styles.weekEmptyHint}>Acesse a aba Registrar para planejar sua semana ou registre um treino que já foi concluído.</Text>
           </View>
         ) : (
           weeklyWorkouts.map((w) => {
             const done = w.status === 'completed';
             return (
               <View key={w.id} style={styles.weekCard}>
-                <View style={[styles.weekDot, { backgroundColor: done ? '#00FF66' : '#FF6B00' }]} />
+                <View style={[styles.weekDot, { backgroundColor: done ? '#00FF66' : '#FF6B0060' }]} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.weekWorkoutName}>{w.name}</Text>
                   <Text style={styles.weekWorkoutDate}>{formatDate(w.date)}</Text>
                 </View>
-                <Text style={[styles.weekBadge, { color: done ? '#00FF66' : '#FF6B00' }]}>
+                <Text style={[styles.weekBadge, { color: done ? '#00FF66' : '#CCCCCC' }]}>
                   {done ? 'Concluído' : 'Planejado'}
                 </Text>
               </View>
