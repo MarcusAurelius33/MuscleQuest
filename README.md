@@ -138,12 +138,11 @@ MuscleQuest/
 
 ---
 
-## 🚀 10. Versões em Deploy
+## 🚀 10. Versão em Deploy
 
 | Versão | Data | Link |
 | :--- | :--- | :--- |
-| **v1.x** — Base + Gamificação + Calendário | 2026-03 | *(link APK v1)* |
-| **v2.x** — Templates, Filtros, UX avançado | 2026-04 | *(link APK v2)* |
+| **v2.x** — Templates, Filtros, UX avançado | 2026-04 | [Download APK](https://github.com/MarcusAurelius33/MuscleQuest/releases/download/v2.0.0/MuscleQuest-v2.0.0.apk) |
 
 > Os builds são gerados via **EAS Build** (`eas build -p android --profile preview`) e distribuídos como APK direto para Android.
 
